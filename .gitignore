@@ -1,0 +1,32 @@
+# STM32CubeIDE build intermediates (regenerated) — exclude bulk, keep binaries
+Debug/**/*.o
+Debug/**/*.d
+Debug/**/*.su
+Debug/**/*.list
+Debug/**/*.cyclo
+Debug/objects.list
+Debug/sources.mk
+Debug/objects.mk
+Debug/makefile
+Debug/*.map
+
+Release/**/*.o
+Release/**/*.d
+Release/**/*.su
+Release/**/*.list
+Release/**/*.cyclo
+Release/objects.list
+Release/sources.mk
+Release/objects.mk
+Release/makefile
+Release/*.map
+
+# Runtime / local agent state (not shared)
+.claude/
+.bkit/
+.settings/
+
+# Scratch / backups / baseline captures
+*.bak
+*.swp
+baseline/

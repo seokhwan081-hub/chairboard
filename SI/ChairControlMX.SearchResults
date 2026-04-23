@@ -1,0 +1,6 @@
+---- LL_GPIO_PIN_13 Matches (5 in 2 files) ----
+Main.h (core\inc):#define DRV2_IN1_Pin LL_GPIO_PIN_13
+Main.h (core\inc):#define LMT_CHAIR2_DW_Pin LL_GPIO_PIN_13
+Main.h (core\inc):#define SW_CHAIR2_DW_Pin LL_GPIO_PIN_13
+Stm32f1xx_ll_gpio.h (drivers\stm32f1xx_hal_driver\inc):#define LL_GPIO_PIN_13                   ((GPIO_BSRR_BS13 << GPIO_PIN_MASK_POS) | 0x04000020U)  /*!< Select pin 13 */
+Stm32f1xx_ll_gpio.h (drivers\stm32f1xx_hal_driver\inc):                                          LL_GPIO_PIN_12 | LL_GPIO_PIN_13 | LL_GPIO_PIN_14 | \
