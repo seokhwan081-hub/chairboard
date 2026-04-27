@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-04-27
+
+### 리팩토링 구현 플랜 작성 + Self-review 보강
+
+- **베이스라인 커밋 생성 완료**: `59db561 chore: baseline snapshot before module decomposition refactor` (94 files, 80,528 insertions). git 저장소 로컬 초기화. `.gitignore`로 `.o/.d/.su/.list/.map/makefile` 제외, `.bin/.elf/.hex` 추적.
+- **사용자 git identity (repo-local)**: `Seokhwan Hong <seokhwan081@gmail.com>` 설정 (`git config` repo-scope).
+- **구현 플랜 문서 작성 완료**: `docs/superpowers/plans/2026-04-23-module-decomposition.md`
+  - 9개 Task: Pre-Work(베이스라인 캡처) + Task 1~8(모듈 추출 7개 + 정리)
+  - 각 Task에 Files / Steps / 빌드·실기 검증 / Commit 포함
+  - 총 ~700줄
+- **Self-review 추가 보강 (4개 누락 발견)**:
+  1. Task 2: `main.h:364~376`의 I2C_SCL/SDA HIGH/LOW/READ 매크로(BOARD_B 분기) 이동 누락 → `hb_storage.c` 파일-private 매크로로 이동 명시 추가
+  2. Task 6: `__io_putchar` 함수(main.c:2817 `PUTCHAR_PROTOTYPE` 블록) 이전 + `main.h:357~363`의 `PUTCHAR_PROTOTYPE` 매크로 제거 단계 추가 (printf USART2 리다이렉트는 hb_comm 소속)
+  3. Task 7: `stm32f1xx_it.c:364, 501`의 두 `#ifdef HW_TEST` 블록 → `hb_mode_tick_1ms` 본체로 이전 단계 추가
+  4. Task 8: "main.c에 main() 외 함수 잔존 없음" 확인용 grep 명령 추가
+- **다음 단계**: 사용자 플랜 검토 → 승인 후 베이스라인 캡처(Pre-Work Task 0) → Task 1(pinmap.h) 착수
+- **실행 모드 선택 대기**: subagent-driven (per-task 분리 실행) vs inline (이 세션에서 순차 실행)
+
+---
+
 ## 2026-04-23
 
 ### 리팩토링 브레인스토밍 진행
