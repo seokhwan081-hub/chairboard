@@ -55,6 +55,12 @@ u32 systick_counter;
 u32 Timer7Counter;
 extern u16 internal_adc_value[10];
 u32 Timer6Counter;
+
+/* ADC_10bit 기준점 (10mm 단위, 측정 평균값 기반, 3.3V ref)
+ * 인덱스 i → 높이 = i*10 mm (0~100mm, 총 11점) */
+static const u16 kLiftColAdcLut[11] = {
+    295, 469, 604, 688, 738, 776, 804, 828, 849, 863, 875
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,6 +70,22 @@ u32 Timer6Counter;
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/* ADC_10bit(after >>2) → 높이(mm) 변환: 구간별 선형 보간, 범위 외 클램핑 */
+static u16 LiftColAdcToMm(u16 adc)
+{
+    u8 i;
+    if (adc <= kLiftColAdcLut[0])  return 0;
+    if (adc >= kLiftColAdcLut[10]) return 100;
+    for (i = 0; i < 10u; i++) {
+        if (adc < kLiftColAdcLut[i + 1u]) {
+            u16 span = kLiftColAdcLut[i + 1u] - kLiftColAdcLut[i];
+            u16 off  = adc - kLiftColAdcLut[i];
+            return (u16)(i * 10u + (off * 10u) / span);
+        }
+    }
+    return 0;
+}
 
 /* USER CODE END 0 */
 
@@ -453,7 +475,7 @@ void TIM7_IRQHandler(void)
 			for(j=0;j<10;j++){
 				Chair1HeightAvg.AdcSum += Chair1HeightAvg.AdcBuf[j];
 				ADConverter.Chair1HeightPot = (u16)(Chair1HeightAvg.AdcSum/10);
-				PotentioChair1Height.CurrentPosition = (u16)((float)ADConverter.Chair1HeightPot/6.7);//0~80mm
+				PotentioChair1Height.CurrentPosition = LiftColAdcToMm(ADConverter.Chair1HeightPot);//0~100mm
 			}
 		}
 		#else
@@ -469,7 +491,7 @@ void TIM7_IRQHandler(void)
 			for(j=0;j<10;j++){
 				Chair2HeightAvg.AdcSum += Chair2HeightAvg.AdcBuf[j];
 				ADConverter.Chair2HeightPot = (u16)(Chair2HeightAvg.AdcSum/10);
-				PotentioChair2Height.CurrentPosition = (u16)((float)ADConverter.Chair2HeightPot/2.5);//0~80mm
+				PotentioChair2Height.CurrentPosition = LiftColAdcToMm(ADConverter.Chair2HeightPot);//0~100mm
 			}
 		}
 		#else

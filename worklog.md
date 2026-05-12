@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-05-12
+
+### 리프트 칼럼 높이 센서 ADC 변환 수식 비선형 보정
+
+- **문제 파악**: `stm32f1xx_it.c` TIM7 ISR 내 Chair1/Chair2 높이 포텐셔미터 변환식(`/6.7`, `/2.5`)이 선형 가정 기반으로, 실측 결과 비선형(지수 포화) 특성과 불일치함을 확인.
+- **실측 데이터 분석**: `5.8 리프트 칼럼 측정.xlsx` (LC-8/9/10/16 4개 유닛 평균) 검토.
+  - 높이 범위: 0~10cm(0~100mm), 전압 범위: 0.95V~2.82V
+  - 엑셀 제시 모델: 지수 포화 `V = 1.8881×(1-e^(-0.3550×h)) + 0.9569` (R²=0.9987, RMSE=0.021V)
+  - 역방향: `h = -ln(1-(V-0.9569)/1.8881) / 0.3550`
+- **구현 방식 결정**: STM32F1(FPU 없음) 특성상 `logf()` 대신 **LUT + 구간 선형 보간** 채택.
+  - 10mm 단위 11개 기준점 → 구간 내 `(off×10)/span` 정수 보간으로 1mm 분해능 확보
+  - ADC 범위 초과(노이즈 포함) 시 클램핑 처리
+- **코드 변경 내용** (`Core/Src/stm32f1xx_it.c`):
+  - `kLiftColAdcLut[11]` 추가 (USER CODE BEGIN PV): ADC_10bit 기준점 배열 `{295, 469, 604, 688, 738, 776, 804, 828, 849, 863, 875}`
+  - `LiftColAdcToMm(u16 adc)` 추가 (USER CODE BEGIN 0): 보간 변환 함수
+  - Chair1 변환식 교체: `(float)ADConverter.Chair1HeightPot/6.7` → `LiftColAdcToMm(ADConverter.Chair1HeightPot)`
+  - Chair2 변환식 교체: `(float)ADConverter.Chair2HeightPot/2.5` → `LiftColAdcToMm(ADConverter.Chair2HeightPot)`
+  - 높이 범위 주석 `//0~80mm` → `//0~100mm` 업데이트
+- **후속 검토 권고**: HWTest 분기(`stm32f1xx_it.c` line 528, 534)의 높이 임계값(`>170`, `<78`)이 이전 스케일 기준이므로 실기 검증 후 수정 필요.
+
+---
+
 ## 2026-04-27
 
 ### 리팩토링 구현 플랜 작성 + Self-review 보강
